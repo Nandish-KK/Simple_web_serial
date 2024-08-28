@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSerial Communication</title>
+</head>
+<body>
+    <h1>Send and Receive Data via WebSerial</h1>
+    
+    <!-- Section for Sending Data -->
+    <section>
+        <h2>Send Data to Serial Device</h2>
+        <!-- Button to connect to the serial device -->
+        <button id="connect">Connect to Serial Device</button>
+
+        <!-- Dropdown for selecting baud rate -->
+        <label for="baudRate">Baud Rate:</label>
+        <select id="baudRate">
+            <option value="9600">9600</option>
+            <option value="19200">19200</option>
+            <option value="38400">38400</option>
+            <option value="57600">57600</option>
+            <option value="115200">115200</option>
+        </select>
+
+        <!-- Input field to type the message to send -->
+        <input id="input" type="text" placeholder="Type message...">
+        
+        <!-- Button to send the typed message -->
+        <button id="send">Send</button>
+
+        <!-- Button to stop the connection -->
+        <button id="stop">Stop Connection</button>
+        
+        <!-- Output area for connection status -->
+        <div id="status"></div>
+    </section>
+
+    <!-- Section for Receiving Data -->
+    <section>
+        <h2>Receive Data from Serial Device</h2>
+        <!-- Text area to show received data -->
+        <textarea id="receivedData" rows="10" cols="50" placeholder="Received data will appear here..." readonly></textarea>
+    </section>
+
+    <!-- Link to the JavaScript files -->
+    <script src="serialConnection.js"></script>
+    <script src="send.js"></script>
+    <script src="receive.js"></script>
+
+</body>
+</html>
