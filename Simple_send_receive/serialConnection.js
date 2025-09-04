@@ -21,6 +21,7 @@ async function connectToPort() {
         setupRx();
 
         statusElement.textContent = `Status: Connected at ${baudRate} baud`;
+        statusElement.style.color = '#16a085'; // green
     } catch (error) {
         statusElement.textContent = 'Status: Failed to connect';
         console.error('Error connecting to serial device:', error);
@@ -63,53 +64,6 @@ async function closeConnection() {
 }
 
 
-
-function setupTx() {
-    if (sharedPort) {
-        const textEncoder = new TextEncoderStream();
-        writer = textEncoder.writable.getWriter();
-        writableStreamClosed = textEncoder.readable.pipeTo(sharedPort.writable);
-
-        document.getElementById('send').addEventListener('click', async () => {
-            const inputField = document.getElementById('input');
-            const message = inputField.value.trim();
-            if (message) {
-                try {
-                    await writer.write(new TextEncoder().encode(message + '\n'));
-                    console.log('Sent:', message);
-                    inputField.value = ''; // Clear the input field after sending
-                } catch (error) {
-                    console.error('Error sending data:', error);
-                }
-            }
-        });
-    }
-}
-
-function setupRx() {
-    if (sharedPort) {
-        const textDecoder = new TextDecoderStream();
-        reader = textDecoder.readable.getReader();
-        readableStreamClosed = sharedPort.readable.pipeTo(textDecoder.writable);
-
-        const receivedDataElement = document.getElementById('receivedData');
-        (async function readLoop() {
-            while (true) {
-                const { value, done } = await reader.read();
-                if (done) {
-                    reader.releaseLock();
-                    break;
-                }
-                if (value) {
-                    receivedDataElement.value += value;
-                }
-            }
-        })().catch(error => {
-            console.error('Error reading data:', error);
-        });
-    }
-}
-
 // Event listener for the Connect button
 document.getElementById('connect').addEventListener('click', connectToPort);
 
@@ -121,3 +75,11 @@ document.getElementById('baudRate').addEventListener('change', async () => {
     await closeConnection();
     await connectToPort();
 });
+
+navigator.serial.addEventListener('disconnect', (event) => {
+    const statusElement = document.getElementById('status');
+    statusElement.textContent = 'Status: Device disconnected';
+    statusElement.style.color = '#e74c3c'; // red
+    closeConnection();
+});
+

@@ -1,15 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSerial Communication</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSerial Communication</title>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(120deg, #f0f4f8 0%, #e0e7ef 100%);
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-top: 30px;
+    }
+
+    section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+      margin: 30px auto;
+      padding: 24px 32px;
+      max-width: 900px;
+    }
+
+    label,
+    select,
+    input,
+    button {
+      font-size: 1rem;
+      margin: 8px 0;
+    }
+
+    input[type="text"] {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #bfc9d4;
+      width: 60%;
+      margin-right: 8px;
+    }
+
+    button {
+      background: #2980b9;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-right: 8px;
+    }
+
+    button:hover {
+      background: #3498db;
+    }
+
+section > label[for="baudRate"] {
+  margin-left: 100px;
+}
+
+
+    textarea {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #bfc9d4;
+      padding: 12px;
+      font-size: 1rem;
+      background: #f8fafc;
+      resize: vertical;
+      box-sizing: border-box;
+      margin-top: 8px;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+    }
+
+    #sentOutput {
+      margin-top: 10px;
+      color: #34495e;
+      font-weight: bold;
+      word-break: break-word;
+      white-space: pre-wrap;
+      max-width: 60%;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .input-group select,
+    .input-group button {
+      height: 2.5em;
+    }
+
+    .main-layout {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 32px;
+      max-width: 1200px;
+      margin: 40px auto;
+    }
+
+    .tool-panel {
+      flex: 1 1 0;
+      min-width: 400px;
+    }
+
+    .instructions-panel {
+      flex: 1 1 0;
+      min-width: 300px;
+      background: #f8fafc;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+      padding: 24px 32px;
+      margin-top: 30px;
+    }
+
+    .instructions-panel h2 {
+      color: #2c3e50;
+      margin-top: 0;
+    }
+
+    .instructions-panel ul {
+      padding-left: 18px;
+      color: #34495e;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .instructions-panel li {
+      margin-bottom: 10px;
+    }
+
+    textarea#receivedData {
+      width: 100%;
+      box-sizing: border-box;
+      white-space: pre-wrap;
+      word-break: normal;
+    }
+  </style>
+
+  <script>
+    // Function to append data and auto-scroll the textarea
+    function appendData(data) {
+      const textarea = document.getElementById("receivedData");
+      textarea.value += data + '\n';
+      setTimeout(() => {
+        textarea.scrollTop = textarea.scrollHeight;
+      }, 10);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const inputArea = document.getElementById('input');
+      inputArea.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
+
+      document.getElementById('clearReceive').addEventListener('click', function () {
+        document.getElementById('receivedData').value = '';
+      });
+
+      document.getElementById('saveReceive').addEventListener('click', function () {
+        const data = document.getElementById('receivedData').value;
+        const blob = new Blob([data], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'serial_data.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    });
+  </script>
 </head>
+
 <body>
-    <h1>Send and Receive Data via WebSerial</h1>
-    
-    <!-- Section for Sending Data -->
-    <section>
+  <h1>Web-Serial Monitor</h1>
+  <div class="main-layout">
+    <!-- Left: Tool -->
+    <div class="tool-panel">
+
+
+      <!-- Section for Sending Data -->
+      <section>
         <h2>Send Data to Serial Device</h2>
         <!-- Button to connect to the serial device -->
         <button id="connect">Connect to Serial Device</button>
@@ -17,37 +201,99 @@
         <!-- Dropdown for selecting baud rate -->
         <label for="baudRate">Baud Rate:</label>
         <select id="baudRate">
-            <option value="9600">9600</option>
-            <option value="19200">19200</option>
-            <option value="38400">38400</option>
-            <option value="57600">57600</option>
-            <option value="115200">115200</option>
+          <option value="9600">9600</option>
+          <option value="19200">19200</option>
+          <option value="38400">38400</option>
+          <option value="57600">57600</option>
+          <option value="115200">115200</option>
+          <option value="230400">230400</option>
+          <option value="460800">460800</option>
+          <option value="921600">921600</option>
         </select>
 
         <!-- Input field to type the message to send -->
-        <input id="input" type="text" placeholder="Type message...">
-        
-        <!-- Button to send the typed message -->
-        <button id="send">Send</button>
+        <div class="input-group">
+          <textarea id="input" rows="1" placeholder="Type message..."
+            style="resize:none; overflow:hidden; width:60%;"></textarea>
+
+          <select id="endlineType" style="height: 2.5em;">
+            <option value="none">None</option>
+            <option value="lf">\n (LF)</option>
+            <option value="cr">\r (CR)</option>
+            <option value="crlf">\r\n (CRLF)</option>
+          </select>
+
+          <!-- Button to send the typed message -->
+          <button id="send">Send</button>
+        </div>
+
+        <!-- Add this below the Send button -->
+        <div id="sentOutput"></div>
 
         <!-- Button to stop the connection -->
         <button id="stop">Stop Connection</button>
-        
+
         <!-- Output area for connection status -->
         <div id="status"></div>
-    </section>
+      </section>
 
-    <!-- Section for Receiving Data -->
-    <section>
+      <!-- Section for Receiving Data -->
+      <section>
         <h2>Receive Data from Serial Device</h2>
-        <!-- Text area to show received data -->
-        <textarea id="receivedData" rows="10" cols="50" placeholder="Received data will appear here..." readonly></textarea>
-    </section>
+        <textarea id="receivedData" rows="10" placeholder="Received data will appear here..." readonly></textarea>
+        <div style="margin-top: 8px;">
+          <button id="clearReceive">Clear</button>
+          <button id="saveReceive">Save</button>
+        </div>
+      </section>
+    </div>
+    <!-- Right: Instructions -->
+    <div class="instructions-panel">
+      <h2>Instructions</h2>
+      <ul>
+        <li>Make sure your browser supports WebSerial. Most of the chromium based browsers do. If your browser does not
+          support it, you may need to enable experimental features or use a different browser.</li>
+        <li>Select desired Baud rate and a pop-up window will appear.</li>
+        <li>Select the external Serial Device and press Connect.</li>
+        <li>Type your message and choose the endline type.</li>
+        <li>Press <b>Send</b> or hit <b>Enter</b> to transmit.</li>
+        <li>View sent and received data below.</li>
+        <li>If the device disconnects, status will turn red.</li>
+      </ul>
+    </div>
+  </div>
 
-    <!-- Link to the JavaScript files -->
-    <script src="serialConnection.js"></script>
-    <script src="send.js"></script>
-    <script src="receive.js"></script>
+  <!-- Link to the JavaScript files -->
+  <script src="serialConnection.js"></script>
+  <script src="send.js"></script>
+  <script src="receive.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const inputArea = document.getElementById('input');
+      inputArea.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+      });
 
+      document.getElementById('clearReceive').addEventListener('click', function () {
+        document.getElementById('receivedData').value = '';
+      });
+
+      document.getElementById('saveReceive').addEventListener('click', function () {
+        const data = document.getElementById('receivedData').value;
+        const blob = new Blob([data], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'serial_data.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    });
+  </script>
 </body>
+
 </html>

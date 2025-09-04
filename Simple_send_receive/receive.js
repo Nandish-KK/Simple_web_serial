@@ -1,6 +1,14 @@
-function setupRx() {
-    const receivedDataElement = document.getElementById('receivedData');
+let rxBuffer = '';
 
+function appendData(data) {
+    const textarea = document.getElementById("receivedData");
+    textarea.value += data;
+    setTimeout(() => {
+        textarea.scrollTop = textarea.scrollHeight;
+    }, 10);
+}
+
+function setupRx() {
     if (sharedPort) {
         const textDecoder = new TextDecoderStream();
         reader = textDecoder.readable.getReader();
@@ -10,7 +18,8 @@ function setupRx() {
             if (done) return;
 
             if (value) {
-                receivedDataElement.value += value;
+                console.log('Received:', value); // Add this line
+                appendData(value);
             }
 
             // Continue reading
